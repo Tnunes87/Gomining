@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GoMining v3.6</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Litepicker CSS (minimaliste, moderne, très lisible) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css">
+  <style>
+    /* Agrandir le calendrier Litepicker et le rendre plus visible */
+    .litepicker {
+      font-size: 1.25rem !important;
+      min-width: 340px !important;
+      box-shadow: 0 4px 32px #40dfff22 !important;
+      border-radius: 18px !important;
+      border: 1.5px solid #40dfff !important;
+      background: #181c24 !important;
+      color: #f4f8ff !important;
+      z-index: 9999 !important;
+    }
+    .litepicker .container__days .day-item {
+      border-radius: 8px !important;
+      font-weight: 600;
+      font-size: 1.1em;
+      transition: background .18s;
+    }
+    .litepicker .container__days .day-item.is-today {
+      background: #40dfff !important;
+      color: #181c24 !important;
+    }
+    .litepicker .container__days .day-item.is-selected {
+      background: linear-gradient(120deg, #40dfff 60%, #2d0347 100%) !important;
+      color: #fff !important;
+    }
+    .litepicker .container__days .day-item:hover {
+      background: #2d0347 !important;
+      color: #fff !important;
+    }
+    .litepicker .container__months {
+      background: #181c24 !important;
+      color: #40dfff !important;
+      font-weight: 700;
+    }
+    .litepicker .container__days .day-item.is-locked {
+      color: #888 !important;
+      background: none !important;
+    }
+    .litepicker .container__footer {
+      background: #181c24 !important;
+      color: #40dfff !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ─── Résumé ───────────────────────────────────────────── -->
+    <section id="resume" class="section open">
+      <header class="section-header">
+        <button class="toggle" data-target="resume"><span data-feather="chevron-down"></span></button>
+        <h2>Résumé</h2>
+        <span id="rate-bar"></span>
+      </header>
+      <div class="section-body">
+
+        <!-- Tuiles cours (BTC / GMT / USD↔EUR) -->
+        <div id="rate-tiles" class="tiles"></div>
+
+        <!-- Tuiles principales -->
+        <div id="resume-tiles" class="tiles" style="margin-top:16px;"></div>
+        
+        <!-- Tuiles mineurs -->
+        <div id="miners-grid" class="miners-grid"></div>
+      </div>
+    </section>
+
+    <!-- ─── Investissements ──────────────────────────────────── -->
+    <section id="investissements" class="section">
+      <header class="section-header">
+        <button class="toggle" data-target="investissements"><span data-feather="chevron-down"></span></button>
+        <h2>Investissements</h2>
+        <div class="section-actions">
+          <select id="filter-year"></select>
+          <select id="filter-month"></select>
+          <button id="add-invest-btn" class="btn round primary"><span data-feather="plus-circle"></span></button>
+        </div>
+      </header>
+      <div class="section-body">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Mineur</th><th>Cat.</th><th>Qté</th><th>Coût €</th><th>€/unité</th><th></th></tr></thead>
+          <tbody id="invest-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Gains ────────────────────────────────────────────── -->
+    <section id="gains" class="section">
+      <header class="section-header">
+        <button class="toggle" data-target="gains"><span data-feather="chevron-down"></span></button>
+        <h2>Gains</h2>
+        <div class="section-actions">
+          <button id="add-gain-btn" class="btn round primary"><span data-feather="plus-circle"></span></button>
+        </div>
+      </header>
+      <div class="section-body">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Satoshis</th><th>Service GMT</th><th>Élec GMT</th><th></th></tr></thead>
+          <tbody id="gain-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Ventes ───────────────────────────────────────────── -->
+    <section id="ventes" class="section">
+      <header class="section-header">
+        <button class="toggle" data-target="ventes"><span data-feather="chevron-down"></span></button>
+        <h2>Ventes</h2>
+        <div class="section-actions">
+          <button id="add-sale-btn" class="btn round primary"><span data-feather="plus-circle"></span></button>
+        </div>
+      </header>
+      <div class="section-body">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Sats vendus</th><th>Montant €</th><th></th></tr></thead>
+          <tbody id="sale-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+<!-- ─── Debug ────────────────────────────────────────────── -->
+<section id="debug" class="section">
+  <header class="section-header">
+    <button class="toggle" data-target="debug">
+      <span data-feather="chevron-down"></span>
+    </button>
+    <h2>Base de données</h2>
+
+    <div class="section-actions">
+      <button id="export-json-btn" class="btn">
+        <span data-feather="upload"></span> Export
+      </button>
+      <button id="import-json-btn" class="btn">
+        <span data-feather="download"></span> Import
+      </button>
+      <button id="reset-db-btn"  class="btn danger">
+        <span data-feather="trash"></span> Vider DB
+      </button>
+    </div>
+  </header>
+
+  <div class="section-body">
+    <pre id="debug-json"></pre>
+  </div>
+</section>
+
+  <!-- ─── Modale réutilisable ───────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="modal-content" class="modal-content"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/litepicker" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

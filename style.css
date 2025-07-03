@@ -1,0 +1,1265 @@
+/* ════════════════════════════════════════════════════════════
+   0. POLICE & VARIABLES GLOBALES
+   Chaque variable est annotée pour rappeler son usage exact.
+   ════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap");
+
+:root{
+  /* ―– Dimensions & effets ––––––––––––––––––––––––––––––––– */
+  --radius : 25px;   /* Rayon standard pour tous les blocs arrondis   */
+  --blur   : 10px;   /* Flou glassmorphism appliqué aux tuiles, etc.  */
+
+  /* ―– Couleurs principales –––––––––––––––––––––––––––––––– */
+  --primary : #ffc800; /* Bleu-cyan : couleur d’accent (boutons, badges)  */
+  --danger  : #ff6363; /* Rouge doux : actions critiques / erreurs        */
+  --fg      : #f4f8ff; /* Texte clair par défaut (avant sur #062b59)      */
+
+  /* ―– Typographie ––––––––––––––––––––––––––––––––––––––––– */
+  --font : 'Montserrat', -apple-system, BlinkMacSystemFont,
+           "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+           "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* ════════════════════════════════════════════════════════════
+   1. RESET MINIMAL
+   Remise à zéro des marges et adoption du box-sizing universel.
+   ════════════════════════════════════════════════════════════ */
+*{
+  margin : 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ════════════════════════════════════════════════════════════
+   2. BASE HTML / BODY
+   Police, couleurs, fond général et conteneur principal.
+   ════════════════════════════════════════════════════════════ */
+html, body{
+  height      : 100%;
+  font-family : var(--font);
+  font-size   : 14px;        /* 1 rem = 14 px                             */
+  color       : var(--fg);   /* Couleur de texte par défaut               */
+  overflow-x  : hidden;      /* Empêche le scroll horizontal global       */
+}
+
+/* — Fond dégradé + layout flex pour centrer le #app — */
+body{
+  background : linear-gradient(120deg,
+                #062b59 25%,   /* bleu nuit       */
+                #2d0347 50%,   /* violet profond  */
+                #995b09 90%);  /* brun orangé     */
+  background-attachment : fixed;  /* effet “parallaxe” */
+  display   : flex;
+  justify-content : center;
+  align-items     : flex-start;
+  padding   : 24px;
+  min-height: 100vh;
+}
+
+/* ════════════════════════════════════════════════════════════
+   3. CONTENEUR PRINCIPAL (#app)
+   Centre la page et limite la largeur.
+   ════════════════════════════════════════════════════════════ */
+#app{
+  width      : 100%;
+  max-width  : 1380px;   /* largeur fixe desktop                        */
+  display    : flex;
+  flex-direction : column;
+  gap        : 24px;
+  overflow-x : hidden;   /* évite toute barre horizontale intérieure    */
+}
+
+/* — Ajustement tablette / mobile large — */
+@media (max-width:1280px){
+  #app{
+    width     : 100%;  /* 100% au lieu de 100vw pour éviter la barre   */
+    max-width : 100vw; /* suit toute la largeur visible                */
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. GRILLES GÉNÉRIQUES (.tiles & .miners-grid)
+   Gap global + anti-débordement.
+   ════════════════════════════════════════════════════════════ */
+.tiles,
+.miners-grid{
+  display   : grid;
+  gap       : 20px;   /* espace entre les cartes                       */
+  min-width : 0;      /* empêche l’étirement qui casserait le layout   */
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   5. SECTIONS (wrapper, header, body)
+   ─ Rassemble toute la structure des blocs pliables
+   ─ Chaque propriété est commentée pour faciliter la lecture
+   ════════════════════════════════════════════════════════════ */
+
+/* —— carte extérieure de la section ———————————————— */
+.section{
+  background : none;                                         /* on laisse le dégradé de body visible            */
+  border     : 1px solid rgba(255,255,255,.18);              /* fin trait blanc translucide                     */
+  border-radius : var(--radius);                             /* arrondi global réutilisable                     */
+}
+
+/* —— bandeau cliquable (titre + flèche + actions) ————————— */
+.section-header{
+  display        : flex;                                     /* aligne flèche, titre, actions sur une ligne     */
+  align-items    : center;
+  gap            : .5rem;                                    /* petit espace inter-éléments                     */
+  padding        : 14px;                                     /* zone cliquable plus généreuse                   */
+  cursor         : pointer;                                  /* main au survol → on sait que c’est pliable      */
+}
+
+/* titre (h2) poussé à gauche ; les actions restent à droite  */
+.section-header h2{
+  margin     : 0;
+  margin-right : auto;                                       /* prend toute la place disponible                 */
+  flex       : 0 1 auto;
+}
+
+/* —— icône “chevron” (toggle) placée AVANT le titre ———— */
+.section-header .toggle{
+  order           : -1;                                      /* passe devant le h2                              */
+  display         : inline-flex;
+  align-items     : center;
+  margin-inline   : 0;                                       /* pas d’espace parasite gauche/droite             */
+}
+
+/* rotation de la flèche (fermée = 90°)                     */
+.section-header .toggle svg{
+  transition : transform .25s ease;
+  transform  : rotate(-90deg);                               /* icône pointant vers la droite = section fermée  */
+}
+
+/* section ouverte → flèche vers le bas                     */
+.section.open .toggle svg{
+  transform : rotate(0deg);
+}
+
+/* redondance-sécurité : si la classe .open disparaît       */
+.section:not(.open) .toggle svg{
+  transform : rotate(-90deg);
+}
+
+/* —— contenu interne (body) ———————————————————————— */
+.section-body{
+  padding    : 24px;                                         /* même respiration que les tuiles                 */
+  border-top : 1px solid rgba(255,255,255,.12);              /* trait fin sous le header                        */
+}
+
+/* si la section n’est pas ouverte → on masque le body      */
+.section:not(.open) .section-body{
+  display : none;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   6. TUILES & CARTES
+   Blocs visuels réutilisables : « .tile » et « .miner-card »
+   s’affichent dans deux grilles : .tiles (fixe 5 col.) et
+   .miners-grid (auto-fit). Tous les sous-règles spécifiques
+   (prévisionnel / seuil) restent ici pour garder la cohérence.
+   ════════════════════════════════════════════════════════════ */
+
+/* 6-1  GRILLES GÉNÉRIQUES ---------------------------------- */
+.tiles,
+.miners-grid{
+  display : grid;
+  gap     : 20px;          /* même spacing pour les deux grilles   */
+  min-width : 0;           /* évite le « grid blowout »            */
+}
+
+/* — 5 tuiles par ligne, fixe desktop — */
+.tiles{
+  grid-template-columns : repeat(5, 1fr);
+  margin-bottom         : 28px;
+}
+
+/* — carte mineur : responsive auto-fit — */
+.miners-grid{
+  grid-template-columns: repeat(5, 1fr);      /* EXACTEMENT 5 colonnes desktop */
+}
+@media (max-width:1000px){
+  .miners-grid{
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+
+/* 6-2  STYLE GÉNÉRIQUE : tuile & carte ---------------------- */
+.tile,
+.miner-card{
+  background      : rgba(255,255,255,.05);
+  backdrop-filter : blur(calc(var(--blur)*.85));
+  padding         : 24px;
+  border-radius   : var(--radius);
+  border          : 1px solid rgba(255,255,255,.35);
+  box-shadow      : none;
+  transition      : transform .20s, box-shadow .20s;
+}
+
+.tile:hover,
+.miner-card:hover{
+  transform : translateY(-2px);
+  box-shadow: 0 0 8px 1px rgba(255,255,255,.25); /* halo blanc */
+}
+
+/* 6-3  TUILE (contenu centré) ------------------------------- */
+.tile{
+  text-align : center;
+}
+
+.tile h4{
+  font : 900 1.25rem/1 var(--font);
+  letter-spacing : .01em;
+  margin-bottom : 12px;
+  color : #cea41c;
+}
+
+.tile .value{
+  font-size : 1.55rem;
+  font-weight : 800;
+}
+
+.tile small{
+  display : block;
+  margin-top : 12px;
+  font-size : 1rem;
+  color : #fff;
+}
+
+/* tuile pleine largeur (#grid-column:1/-1)                   */
+.tile[style*="grid-column:1/-1"]{
+  padding : 30px 32px;
+}
+
+.tile-icon,
+.summary-badge{           /* ← alias ajouté */
+  /* cercle dégradé identique aux miner-badge */
+  width:2.6em;
+  height:2.6em;
+  border-radius:50%;
+  background:linear-gradient(135deg,#d4b404 0%,#4a0375 90%);
+  border:1.5px solid #fff;
+  box-shadow:0 2px 8px rgba(64,223,255,.08);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px;
+  margin:0 auto 6px;
+}
+
+/* icône à l’intérieur du cercle */
+.tile-icon svg,
+.tile-icon span[data-feather],
+.summary-badge svg,
+.summary-badge span[data-feather]{
+  width:60%;
+  height:60%;
+  stroke:#fff;
+  stroke-width:2;
+  fill:none;
+}
+
+/* 6-4  CARTE « miner » -------------------------------------- */
+.miner-card{
+  display : flex;
+  flex-direction : column;
+  align-items : center;
+  text-align  : center;
+}
+
+.miner-card strong{ color:var(--primary); font-weight:700; }
+
+.miner-card ul{
+  display : flex;
+  flex-direction : column;
+  align-items : center;
+  list-style : none;
+  padding : 0;
+  margin-top : 10px;
+  font-size : .98rem;
+  color : #fff;
+}
+
+.miner-card ul li:nth-child(-n+2){
+  font-size : 1.18em;
+  font-weight : 700;
+  color : #fff;
+}
+
+/* ════════════════════════════════════════════════════════════
+   6-5  TUILE « Prévisionnel » & « Seuil »
+   Spécifiques : affichage sur 3 / 2 colonnes, tableau interne
+   ════════════════════════════════════════════════════════════ */
+
+/* — Prévisionnel (span 3) — */
+.tile.forecast-tile {
+  grid-column: 1 / span 3 !important;   /* La tuile occupe 3 colonnes sur la grille principale */
+  display: flex !important;             /* Utilise Flexbox pour organiser le contenu verticalement */
+  flex-direction: column !important;    /* Les éléments sont empilés du haut vers le bas */
+  align-items: stretch !important;      /* Les éléments enfants s'étirent pour remplir la largeur */
+  justify-content: center !important;   /* Centre verticalement le contenu dans la tuile */
+  text-align: left !important;          /* Aligne le texte à gauche par défaut */
+  min-height: 160px !important;         /* Hauteur minimale plus compacte (réduite) */
+  padding-top: 10px !important;         /* Espace intérieur en haut de la tuile */
+  padding-bottom: 10px !important;      /* Espace intérieur en bas de la tuile */
+  box-sizing: border-box;               /* Inclut padding et bordure dans la taille totale */
+}
+
+/* Icône cerclée centrée et espace sous l’icône */
+.tile.forecast-tile .summary-badge {
+  margin: 0 auto 8px auto !important;   /* Centre l’icône horizontalement et ajoute 8px sous l’icône */
+  display: flex;                        /* Centre le contenu dans l’icône */
+  align-items: center;                  /* Centre verticalement */
+  justify-content: center;              /* Centre horizontalement */
+}
+
+/* Titre centré et espace sous le titre */
+.tile.forecast-tile h4 {
+  margin: 0 0 10px 0 !important;        /* 10px d’espace sous le titre, aucun au-dessus */
+  text-align: center !important;        /* Centre le texte du titre */
+  width: 100%;                          /* Le titre prend toute la largeur de la tuile */
+}
+
+/* Ligne réduction sur une seule ligne, centrée */
+.tile.forecast-tile .reduc-line {
+  display: flex;                        /* Place tous les éléments sur la même ligne */
+  align-items: center;                  /* Centre verticalement le texte, le champ et le % */
+  justify-content: center;              /* Centre horizontalement l'ensemble */
+  gap: 8px;                             /* Espace entre le texte, le champ et le % */
+  margin-bottom: 8px;                   /* 8px d’espace sous la ligne de réduction */
+  font-size: 1em;                       /* Taille de police normale */
+  text-align: center;                   /* Centre le texte à l'intérieur */
+}
+
+/* Champ réduction largeur fixe, centré, coins très arrondis */
+.tile.forecast-tile .reduc-line input[type="number"] {
+  width: 60px !important;               /* Largeur fixe du champ de saisie (60px) */
+  display: inline-block;                /* Affiche le champ sur la même ligne que le texte */
+  text-align: center;                   /* Centre le texte dans le champ */
+  padding: 4px 10px;                    /* Espace intérieur (haut/bas : 4px, gauche/droite : 10px) */
+  font-size: 1.1em;                     /* Taille du texte dans le champ */
+  border: none;                         /* Pas de bordure par défaut */
+  border-radius: 999px;                 /* Coins ultra arrondis (effet pilule) */
+  background: rgba(255,255,255,.13);    /* Fond translucide blanc */
+  color: #fff;                          /* Texte blanc */
+  margin: 0;                            /* Pas de marge supplémentaire */
+}
+
+/* Tableau compact : moins d’espace entre les lignes */
+.tile.forecast-tile table {
+  margin-top: 0 !important;             /* Pas d’espace au-dessus du tableau */
+  width: 100%;                          /* Le tableau prend toute la largeur de la tuile */
+  border-collapse: collapse;            /* Fusionne les bordures des cellules */
+  font-size: 1em;                       /* Taille de police normale */
+  line-height: 1.2;                     /* Hauteur de ligne compacte */
+}
+
+.tile.forecast-tile table th {
+  text-align: right;                    /* En-têtes de colonne alignés à droite */
+}
+
+.tile.forecast-tile table th:first-child {
+  text-align: left !important;          /* Premier en-tête aligné à gauche */
+}
+
+.tile.forecast-tile table td:not(:first-child) {
+  text-align: right;                    /* Toutes les cellules sauf la première alignées à droite */
+  font-variant-numeric:proportional-nums;   /* Chiffres à chasse fixe pour alignement vertical */
+}
+
+.tile.forecast-tile table td:first-child {
+  text-align: left;                     /* Première cellule alignée à gauche */
+  font: 900 1.07em var(--font);         /* Police très grasse, légèrement agrandie */
+}
+
+.tile.forecast-tile table tbody tr {
+  height: 1.9em !important;             /* Hauteur de chaque ligne du tableau (compact) */
+}
+
+.tile.forecast-tile table td,
+.tile.forecast-tile table th {
+  padding: 2px 0 !important;            /* Padding vertical réduit dans toutes les cellules */
+}
+
+/* ——— Tuile « Seuil de rentabilité » ———————————— */
+.break-even-tile {
+  grid-column: 4 / span 2;              /* La tuile occupe les colonnes 4 et 5 sur la grille */
+  min-height: 160px !important;         /* Hauteur minimale réduite (comme Prévisionnel) */
+  display: flex !important;             /* Utilise Flexbox pour organiser le contenu */
+  flex-direction: column !important;    /* Empile les éléments verticalement */
+  align-items: stretch !important;      /* Les éléments enfants s'étirent pour remplir la largeur */
+  justify-content: center !important;   /* Centre verticalement le contenu */
+  padding-top: 10px !important;         /* Espace intérieur en haut */
+  padding-bottom: 10px !important;      /* Espace intérieur en bas */
+  box-sizing: border-box;               /* Inclut padding et bordure dans la taille totale */
+}
+
+/* Titre de la tuile seuil : centré et espace sous le titre */
+.break-even-tile h4 {
+  margin: 0 0 8px 0 !important;         /* 8px d’espace sous le titre, aucun au-dessus */
+  text-align: center !important;        /* Centre le texte du titre */
+  width: 100%;                          /* Le titre prend toute la largeur de la tuile */
+}
+
+/* NOUVEAU : réduit l’espace sous la durée (assure-toi que la durée a bien cette classe dans le HTML/JS) */
+.break-even-tile .break-even-duration {
+  margin-bottom: 8px !important;        /* Réduit l’espace entre la durée et le cercle (AVANT : plus grand ou absent) */
+  text-align: center;                   /* Centre la durée horizontalement */
+  font-size: 1.35em;                    /* Garde la durée bien visible */
+  font-weight: 700;                     /* Met la durée en gras */
+}
+
+/* MODIFIÉ : réduit l’espace au-dessus du cercle */
+.roi-circle {
+  margin: 8px auto 0 !important;        /* AVANT : 24px auto 0 ; réduit l’espace entre la durée et le cercle */
+  width: 80px;                          /* Cercle de 80px de large */
+  height: 80px;                         /* Cercle de 80px de haut */
+  border: 2px solid #fff;               /* Bordure blanche de 2px */
+  border-radius: 50%;                   /* Cercle parfait */
+  display: flex;                        /* Centre le texte dans le cercle */
+  align-items: center;                  /* Centre verticalement le texte */
+  justify-content: center;              /* Centre horizontalement le texte */
+  font-size: 1.2rem;                    /* Texte ré-agrandi */
+  font-weight: 700;                     /* Texte en gras */
+  color: #fff;                          /* Texte blanc */
+}
+
+
+/* responsive : on garde la même hauteur sous 900 px */
+@media (max-width:900px){
+  .break-even-tile,
+  .forecast-tile{                      /* même règle que l’autre grande tuile */
+    min-height:220px;
+  }
+}
+
+/* ———————————————————————————————————————————
+   Uniformisation des espacements verticaux
+   (24 px au-dessus de l’icône, puis 6 px + 6 px)
+   S’applique à toutes les tuiles et aux cartes mineur
+   ——————————————————————————————————————————— */
+
+.tile,                   /* tuiles classiques            */
+.forecast-tile,          /* tuile Prévisionnel           */
+.break-even-tile,        /* tuile Seuil                  */
+.miner-card{             /* cartes mineur                */
+  padding-top:16px !important;      /* bord haut → icône */
+}
+
+/* icônes dans leurs pastilles */
+.tile-icon,
+.summary-badge,
+.miner-badge{
+  margin:0 auto 10px !important;     /* icône → titre     */
+}
+
+/* titres sous l’icône */
+.tile h4,
+.forecast-tile h4,
+.break-even-tile h4,
+.miner-card strong{
+  margin:0 0 12px !important;        /* titre → contenu   */
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   7. BOUTONS
+   Chaque propriété est commentée individuellement.
+   ════════════════════════════════════════════════════════════ */
+
+/* ——— 7-1  RESET COMMUN ——————————————————————————— */
+button,                        /* cible les balises <button> */
+.btn{                          /* et les éléments ayant .btn */
+  border:none;                 /* enlève la bordure par défaut                */
+  background:transparent;      /* fond invisible                             */
+  color:inherit;               /* hérite de la couleur du parent             */
+  display:inline-flex;         /* contenu en ligne mais flex                 */
+  align-items:center;          /* centre verticalement l’icône et le texte   */
+  gap:4px;                     /* espace constant entre icône et texte       */
+  cursor:pointer;              /* pointeur main au survol                    */
+}
+
+/* ——— 7-2  BOUTON DE BASE (.btn) ——————————————— */
+.btn,                          /* même règles pour .btn et .toggle           */
+.toggle{
+  padding:8px 14px;            /* espace interne vertical 8px / horizontal 14px */
+  border-radius:999px;         /* forme pilule (rayon maximal)               */
+  transition:background .2s;   /* anim. douce du fond sur 0,2 s              */
+}
+.btn:hover{                    /* survol de n’importe quel .btn              */
+  background:rgba(255,255,255,.14); /* léger voile blanc                      */
+}
+
+/* ——— 7-2-a  VARIANTE « primary » ———————————— */
+.btn.primary{                  /* bouton d’action principale                 */
+  background:var(--primary);   /* couleur d’accent définie dans :root        */
+  color:#002b36;               /* texte sombre pour contraste                */
+}
+.btn.primary:hover{            /* survol variant primary                     */
+  filter:brightness(108%);     /* éclaire légèrement la teinte               */
+}
+
+/* ——— 7-2-b  VARIANTE « danger » ————————————— */
+.btn.danger{                   /* action critique / suppression              */
+  color:var(--danger);         /* rouge attitré                              */
+}
+.btn.danger:hover{             /* survol variant danger                      */
+  background:rgba(255,99,99,.08); /* léger voile rouge                       */
+  color:#fff;                  /* texte blanc pour contraste                 */
+}
+
+/* ——— 7-3  BOUTON « miner » (rond) —————————— */
+.miner-btn{                    /* bouton rond indiquant un mineur            */
+  display:inline-flex;         /* centre l’icône                             */
+  align-items:center;          /* idem                                       */
+  justify-content:center;      /* idem                                       */
+  width:2.2em;                 /* diamètre fixe                              */
+  height:2.2em;                /* idem                                       */
+  font-size:1.15em;            /* taille du texte/icône                      */
+  font-weight:700;             /* gras pour la lettre/numéro                 */
+  border-radius:50%;           /* cercle parfait                             */
+  background:linear-gradient(135deg,#40dfff 0%,#2d0347 100%); /* dégradé bleu→violet */
+  border:1.5px solid #fff;     /* trait blanc autour                         */
+  color:#fff;                  /* texte/icône blancs                         */
+  box-shadow:0 2px 8px rgba(64,223,255,.08); /* halo léger                   */
+  margin-bottom:8px;           /* espace sous le bouton                      */
+  margin-right:6px;            /* espace à droite                            */
+  cursor:pointer;             /* main au survol                             */
+  transition:filter .18s,      /* anim. de l’éclaircissement                 */
+             box-shadow .18s;  /* anim. de l’ombre                           */
+}
+.miner-btn.selected{           /* état sélectionné                           */
+  background:var(--primary);   /* devient plein cyan                         */
+  filter:brightness(108%);     /* rendu plus lumineux                        */
+  color:#002b36;               /* texte sombre                               */
+}
+.miner-btn:hover{              /* survol de tout miner-btn                   */
+  filter:brightness(110%)      /* éclaircit encore un peu                    */
+         drop-shadow(0 0 6px #40dfff88); /* halo cyan subtil                */
+}
+
+/* ——— 7-4  BOUTON « cat-btn » (filtre) ——————— */
+button.cat-btn{                /* petits filtres arrondis                    */
+  padding:6px 18px;            /* peu de hauteur, largeur généreuse          */
+  border-radius:999px;         /* pilule                                     */
+  border:1px solid rgba(255,255,255,.25); /* contour clair                   */
+  background:rgba(255,255,255,.15); /* fond semi-transparent                 */
+  color:#fff;                  /* texte blanc                                */
+  font-size:.8rem;             /* plus petit que le corps                    */
+  transition:background .22s;  /* anim. douceur                              */
+}
+button.cat-btn:hover{          /* survol                                     */
+  background:rgba(255,255,255,.25); /* voile plus clair                      */
+}
+button.cat-btn.selected{       /* état actif                                 */
+  background:var(--primary);   /* remplit de cyan                            */
+  border-color:var(--primary); /* bord cyan                                  */
+  color:#002b36;               /* texte sombre                               */
+}
+
+/* ——— 7-5  BOUTON « round » icône seule —————— */
+.btn.round{                    /* version ronde sans texte                   */
+  border-radius:0;             /* pas de pilule (cercle via ::before)        */
+  width:auto; height:auto;     /* taille dépend de l’icône                   */
+  padding:0;                   /* aucun padding                              */
+  background:none;             /* pas de fond direct                         */
+  box-shadow:none;             /* pas d’ombre directe                        */
+  border:none;                 /* pas de bord direct                         */
+  display:flex;                /* centre l’icône                             */
+  align-items:center;
+  justify-content:center;
+  position:relative;           /* nécessaire pour le ::before                */
+  overflow:visible;            /* laisse dépasser l’effet                    */
+}
+/* cercle gradient animé placé derrière l’icône */
+.btn.round::before{
+  content:'';                  /* pseudo-élément vide                        */
+  position:absolute;           /* relatif au .btn.round                      */
+  left:50%; top:50%;           /* centre géométriquement                     */
+  transform:translate(-50%,-50%) scale(.7); /* taille initiale 70 %          */
+  width:1.2em; height:1.2em;   /* diamètre                                   */
+  border-radius:50%;           /* cercle                                     */
+  background:linear-gradient(135deg,#2ec897 0%,#046003 100%); /* dégradé      */
+  opacity:0;                   /* invisible au repos                         */
+  transition:opacity .22s,     /* anim. d’apparition                         */
+             transform .22s;   /* anim. agrandissement                       */
+  z-index:0;                   /* derrière l’icône                           */
+  pointer-events:none;         /* clics traversants                          */
+}
+.btn.round:hover::before{      /* survol                                     */
+  opacity:.92;                 /* devient visible                            */
+  transform:translate(-50%,-50%) scale(1.08); /* grossit légèrement          */
+}
+/* icône feather (couleur forcée) */
+.btn.round span[data-feather],
+.btn.round svg.feather{
+  position:relative;           /* au-dessus du ::before                      */
+  z-index:1;                   /* priorité supérieure                        */
+  width:1.6em; height:1.6em !important;   /* taille icône                               */
+  stroke-width:1.5px;          /* trait plus épais                           */
+  color:#fff !important;       /* icône blanche                              */
+  stroke:#fff !important;      /* contour blanc                              */
+  fill:none !important;        /* pas de remplissage                         */
+}
+.btn.round:hover{box-shadow:none;}  /* évite ombre sur le bouton */
+
+/* ——— 7-5-a Round « primary » (cercle = bouton inverser) ————— */
+
+
+.btn.round.primary{
+  width:45px;          
+  height:45px;          
+  min-width:45px; 
+  min-height:45px;
+
+  /* ❷ Positionnement du cercle */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  /* ❸ Recul par rapport au bord droit de la section */
+  margin-right:6px;              /* même valeur que .pill-btn */
+
+
+  /* ❹ Taille de l’icône “+” / Feather */
+  font-size:2rem;               /* ≈ 24 px → bien visible */
+  line-height:1;                  /* centre verticalement */      
+}
+
+.btn.round.primary span[data-feather],
+.btn.round.primary svg.feather{
+  width:95%;          /* ≈ 22 px */
+  height:95%;
+  stroke-width:1px;
+}
+
+
+/* ——— 7-6  CONTENEUR D’ACTIONS (droite header) ——— */
+.section-actions{
+  gap:18px !important;         /* espace constant entre boutons              */
+  padding-right:0px;           /* éloigne du bord droit du header            */
+  margin-right: -6px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   8. FORMULAIRES
+   Styles communs pour inputs number, text et liste déroulante
+   Chaque propriété est annotée pour compréhension instantanée
+   ════════════════════════════════════════════════════════════ */
+
+/* — champs de saisie (text / number) + <select> -------------- */
+input[type="number"],
+input[type="text"],
+input[type="date"],
+select{
+  width:100%;                       /* occupe toute la largeur du conteneur */
+  padding:10px 12px;                /* respiration interne                  */
+  border:none;                      /* retire bordure native                */
+  border-radius:999px;              /* rend le champ “pillule”              */
+  background:rgba(255,255,255,.18); /* fond translucide                     */
+  color:#fff;                       /* texte blanc                          */
+  font-size:.9rem;                  /* taille un peu plus petite que 1rem   */
+}
+
+/* focus : halo cyan pour accessibilité ----------------------------------- */
+input:focus,
+select:focus{
+  outline:1px solid var(--primary); /* bordure d’accent au focus            */
+}
+
+/* — suppression des flèches ⬆ / ⬇ sur type="number" — */
+input[type="number"]{
+  -moz-appearance:textfield;        /* Firefox                              */
+  appearance:textfield;             /* autres navigateurs                  */
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance:none;          /* Chrome, Safari                      */
+  margin:0;                         /* enlève l’espace résiduel            */
+}
+
+/* — wrapper vertical pour le formulaire Invest — */
+.invest-fields{
+  display:flex;                     /* empile les champs                    */
+  flex-direction:column;
+  gap:15px;                         /* espace constant entre chaque label   */
+}
+.invest-fields label{
+  margin-bottom:10px;               /* titre du champ → petit espace        */
+}
+.invest-fields label:last-child{
+  margin-bottom:0;                  /* évite l’excès en bas du bloc         */
+}
+
+/* ════════════════════════════════════════════════════════════
+   9. TABLEAUX
+   Table d’affichage générique (invest, miner list…)
+   ════════════════════════════════════════════════════════════ */
+.data-table{
+  width:100%;                       /* s’aligne sur la grille               */
+  border-collapse:collapse;         /* fusionne les bordures cellulaires    */
+  font-size:13px;                   /* plus compact que le texte normal     */
+}
+.data-table th,
+.data-table td{
+  padding:10px 12px;                /* espace interne cellule               */
+  text-align:left;                  /* alignement par défaut                */
+  border-bottom:1px solid rgba(255,255,255,.18); /* fine ligne séparatrice  */
+}
+.data-table tbody tr:hover{
+  background:rgba(255,255,255,.10); /* survol discret                       */
+}
+
+/* ════════════════════════════════════════════════════════════
+   10. MODALE (overlay + contenu centré)
+   ════════════════════════════════════════════════════════════ */
+
+/* — voile sombre couvrant tout l’écran — */
+.modal-overlay{
+  position:fixed;                   /* se place au-dessus de tout           */
+  inset:0;                          /* couvre toute la fenêtre              */
+  background:rgba(0,0,0,.6);        /* noir semi-opaque                     */
+  backdrop-filter:blur(8px);        /* flou de fond (glassmorphism)         */
+  display:flex;                     /* permet de centrer le contenu         */
+  align-items:center;
+  justify-content:center;
+  z-index:1000;                     /* au-dessus de la plupart des éléments */
+  transition:opacity .24s;          /* fade in/out                          */
+}
+.modal-overlay.hidden{
+  opacity:0;                        /* état masqué                          */
+  pointer-events:none;              /* clique passe à travers               */
+}
+
+/* — fenêtre modale — */
+.modal-content{
+  background:rgba(255,255,255,.12); /* panneau translucide                  */
+  backdrop-filter:blur(var(--blur));
+  padding:32px;                     /* marge intérieure                     */
+  border-radius:var(--radius);      /* coins arrondis                       */
+  width:100%;                       /* largeur responsive                   */
+  max-width:460px;                  /* limite sur desktop                   */
+  border:1px solid rgba(255,255,255,.35);
+  transform:translateY(24px);       /* démarre légèrement plus bas          */
+  opacity:0;                        /* invisible avant l’anim               */
+  animation:modalIn .26s forwards;  /* entrée en fondu + slide up           */
+}
+@keyframes modalIn{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* — titre & formulaire interne — */
+.modal-content h3{
+  margin-bottom:18px;
+  font-size:1.2rem;
+  font-weight:600;
+}
+.modal-content form{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.modal-content form label{
+  margin-bottom:10px;
+}
+.modal-content form label:last-child{
+  margin-bottom:0;
+}
+
+/* — bloc d’actions (boutons OK / Annuler) — */
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;         /* alignés à droite                     */
+  gap:12px;
+  margin-top:10px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   11. SCROLLBAR (WebKit only)
+   ════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar{
+  width:6px;                        /* taille verticale/horizontale         */
+  height:6px;
+}
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.25); /* couleur du “pouce”                   */
+  border-radius:3px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background:rgba(255,255,255,.35); /* survol plus voyant                   */
+}
+
+/* ════════════════════════════════════════════════════════════
+   12. DEBUG PANEL (facultatif)
+   Affiche JSON / état applicatif dans un cadre sombre
+   ════════════════════════════════════════════════════════════ */
+#debug-json{
+  background:#0004;                 /* noir transparent                     */
+  padding:12px;
+  border-radius:var(--radius);
+  font-size:.72rem;                 /* petit texte                          */
+  white-space:pre-wrap;             /* garde la mise en forme               */
+}
+
+/* ════════════════════════════════════════════════════════════
+   13. MASQUAGE (filtres année & mois dans Invest)
+   ════════════════════════════════════════════════════════════ */
+#filter-year,
+#filter-month{
+  display:none;                     /* retire ces deux champs du flux       */
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   14. BADGE « MINER »  +  CACHER LES TITRES REDONDANTS
+   - .miner-badge : pastille ronde numérotée ou lettre du mineur
+   - Masquage des différents titres « Mineurs » dans la section Résumé
+   ════════════════════════════════════════════════════════════ */
+
+/* ——— MINER BADGE : cercle gradient + ombre légère —————————— */
+.miner-badge{
+  display:inline-flex;                               /* centre le contenu                       */
+  align-items:center;                                /* verticalement                           */
+  justify-content:center;                            /* horizontalement                         */
+  font-size:1.15em;                                  /* taille du caractère                     */
+  font-weight:700;                                   /* caractère plus gras                     */
+  width:2.2em; height:2.2em;                         /* diamètre fixe                           */
+  border-radius:50%;                                 /* cercle parfait                          */
+  background:linear-gradient(135deg,#40dfff 0%,#2d0347 100%);/* dégradé bleu→violet           */
+  border:1.5px solid #fff;                           /* fin trait blanc                         */
+  color:#fff;                                        /* texte blanc                             */
+  box-shadow:0 2px 8px rgba(64,223,255,.08);         /* halo subtil                             */
+  margin-bottom:6px;                                 /* espace sous le badge                   */
+  margin-right:6px;                                  /* espace à droite (avant le suivant)      */
+}
+
+/* ════════════════════════════════════════════════════════════
+   14-bis  RÉSUMÉ : suppression de titres superflus
+   Les titres “Mineurs” apparaissaient en double : on les masque
+   selon leur balise ou classe pour garder une mise en page épurée.
+   ════════════════════════════════════════════════════════════ */
+
+/* 1. Désactive toutes les variantes possibles du titre “Mineurs” */
+#resume-section h4,                  /* titre balise h4 éventuel           */
+#resume-section h2,                  /* titre balise h2 éventuel           */
+#resume-section .miners-title,       /* titre via classe .miners-title     */
+#resume-section .section-header .miners-title{
+  display:none !important;           /* masquage forcé                     */
+}
+
+/* 2. Ajuste la grille des badges mineurs : enlève la marge haute */
+#resume-section .miners-grid{
+  margin-top:0;                      /* colle la grille au bloc précédent  */
+}
+
+/* 3. Supprime pseudo-éléments décoratifs éventuels autour de la grille */
+#resume-section .miners-grid:before,
+#resume-section .miners-grid:after{
+  display:none !important;           /* retire les traits/ornements        */
+}
+
+/* 4. Cas où le titre précède directement .miners-grid                */
+/*    (utilise :has – OK sur browsers Chromium, Safari 17+, FF 121+)  */
+#resume-section h2:has(+ .miners-grid),
+#resume-section h3:has(+ .miners-grid),
+#resume-section h4:has(+ .miners-grid){
+  display:none !important;           /* masque cet unique titre            */
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   15.  TUILE « PRÉVISIONNEL »
+   Objectif : libellés à gauche, montants à droite, tableau lisible
+   Chaque ligne est commentée pour un repérage immédiat.
+   ════════════════════════════════════════════════════════════ */
+
+/* ——— conteneur principal : aligne le texte à gauche ——— */
+.tile.previsionnel{
+  text-align:left !important;                     /* force l’alignement global */
+}
+
+/* ——— rangée libellé / valeur ——————————————— */
+.tile.previsionnel .previsionnel-row{
+  display:flex;                                   /* place libellé + valeur sur une ligne */
+  justify-content:space-between;                  /* espace automatiquement */
+  align-items:center;                             /* center vertical */
+  margin-bottom:6px;                              /* respiration entre lignes */
+}
+
+/* libellé (colonne gauche) */
+.tile.previsionnel .previsionnel-label{
+  text-align:left !important;                     /* maintient la gauche */
+  font-weight:700;                                /* semi-gras            */
+}
+
+/* valeur (colonne droite) */
+.tile.previsionnel .previsionnel-value{
+  text-align:right !important;                    /* alignement à droite  */
+  font-variant-numeric:tabular-nums;              /* chiffres monospaces  */
+  min-width:70px;                                 /* largeur mini pour alignement */
+}
+
+/* ——— phrase “Réduction xx %” sous le titre ————— */
+.tile.previsionnel .previsionnel-reduction{
+  display:block;                                  /* occupe toute la ligne           */
+  margin:10px 0 0;                                /* espace haut 10px, bas 0         */
+  text-align:left !important;                     /* libellé collé à gauche          */
+  font-size:.98rem;                               /* un poil plus petit que le corps */
+  color:#cfe9ff;                                  /* bleu clair                      */
+}
+
+/* champ numérique % dans la phrase */
+.tile.previsionnel .previsionnel-reduction input[type="number"]{
+  margin-left:6px;                                /* petit écart après le libellé     */
+  width:60px;                                     /* largeur fixe                     */
+  padding:4px 10px;                               /* padding interne                  */
+  font-size:1.5em;                                /* valeur bien lisible              */
+  border:none;                                    /* retire border native             */
+  border-radius:8px;                              /* coins doux                       */
+  background:rgba(255,255,255,.13);               /* fond translucide                 */
+  color:#fff;                                     /* texte blanc                      */
+}
+
+/* ════════════════════════════════════════════════════════════
+   15-bis  Table interne de la tuile Prévisionnel
+   ════════════════════════════════════════════════════════════ */
+
+/* en-têtes : valeur à droite sauf 1ʳᵉ colonne */
+#resume-tiles .tile[style*="grid-column:1/-1"] table th{
+  text-align:right;                               /* toutes les colonnes → droite */
+}
+#resume-tiles .tile[style*="grid-column:1/-1"] table th:first-child{
+  text-align:left !important;                     /* sauf la première → gauche */
+}
+
+/* cellules : idem + chiffres tabulaires */
+#resume-tiles .tile[style*="grid-column:1/-1"] table td:not(:first-child){
+  text-align:right;
+  font-variant-numeric:tabular-nums;              /* chiffres alignez verticalement */
+}
+#resume-tiles .tile[style*="grid-column:1/-1"] table td:first-child{
+  text-align:left;
+  font-weight:900;                                /* gras pour le libellé principal */
+  font-size:1.7em;                                /* plus grand                      */
+  color:inherit;                                  /* même couleur que le texte       */
+}
+
+/* hauteur de ligne accrue pour respirer */
+#resume-tiles .tile[style*="grid-column:1/-1"] table tbody tr{
+  height:2em;                                   /* espace vertical                 */
+}
+
+/* padding homogène cellules/entêtes */
+#resume-tiles .tile[style*="grid-column:1/-1"] table td,
+#resume-tiles .tile[style*="grid-column:1/-1"] table th{
+  padding:2px 0;                                  /* 5px haut + bas, 0 latéral       */
+}
+
+/* ════════════════════════════════════════════════════════════
+   15-ter  Alignement à droite des montants dans .data-table
+   ════════════════════════════════════════════════════════════ */
+
+.data-table th.eur,  /* colonnes EUR (en-têtes)   */
+.data-table th.usd,  /* colonnes USD              */
+.data-table th.devise,
+.data-table td.eur,  /* cellules EUR              */
+.data-table td.usd,
+.data-table td.devise,
+.data-table td.amount,
+.data-table th.amount{
+  text-align:right;                               /* chiffres / devises alignés droite */
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   16.  BOUTONS  « GMT »,  « ADD »
+   Deux variantes inspirées de .miner-btn :
+   • .gmt-btn   : pilule allongée (texte court ou « GMT »)
+   • .add-btn   : bouton rond « + »
+   Chaque ligne est commentée séparément.
+   ════════════════════════════════════════════════════════════ */
+
+/* ——— 16-a  GMT  BUTTON ——————————————————————————————— */
+.gmt-btn{
+  display:inline-flex;                                  /* centre le texte horizontalement / verticalement  */
+  align-items:center;                                   /* idem – axe Y                                     */
+  justify-content:center;                               /* idem – axe X                                     */
+  height:2.2em;                                         /* même hauteur que .miner-btn                      */
+  min-width:3.2em;                                      /* largeur mini (s’allonge si texte >)              */
+  padding:0 1.2em;                                      /* espace horizontal interne                        */
+  border-radius:999px;                                  /* forme pilule                                     */
+  background:linear-gradient(135deg,#40dfff 0%,#2d0347 100%);/* dégradé cyan→violet                        */
+  border:1.5px solid #fff;                              /* trait blanc                                      */
+  color:#fff;                                           /* texte blanc                                      */
+  font-size:1.05em;                                     /* légèrement plus grand que le corps               */
+  font-weight:700;                                      /* gras                                             */
+  box-shadow:0 2px 8px rgba(64,223,255,.08);            /* halo subtil                                      */
+  margin:0 6px 0px 0 !important;                                   /* marge droite / bas                               */
+  cursor:pointer;                                       /* main au survol                                   */
+  transition:filter .18s, box-shadow .18s;              /* anim. de survol                                  */
+}
+.gmt-btn.selected{                                      /* état actif (ex. filtre sélectionné)              */
+  background:var(--primary);                            /* plein cyan                                       */
+  filter:brightness(108%);                              /* plus lumineux                                    */
+  color:#002b36;                                        /* texte sombre                                     */
+}
+.gmt-btn:hover{                                         /* survol                                           */
+  filter:brightness(110%) drop-shadow(0 0 6px #40dfff88);
+}
+
+
+
+
+/* ════════════════════════════════════════════════════════════
+   17.  TUILE « CURRENCY » (BTC, GMT, USD)
+   Objectif : devise toujours à droite du nombre, troisième ligne
+   placée sous la valeur.
+   ════════════════════════════════════════════════════════════ */
+
+/* — conteneur flex-col pour empiler value + small — */
+.tile-currency{
+  display:flex;                     /* colonne verticale pour value + small  */
+  flex-direction:column;
+  background:rgba(255,255,255,.05); /* même apparence qu’une .tile           */
+  backdrop-filter:blur(calc(var(--blur)*.85));
+  padding:24px;
+  border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:none;
+  text-align:center;
+  width:100%;
+  min-width:0;
+  justify-self:stretch;
+}
+/* — ligne valeur + devise — */
+.tile-currency .value{
+  display:inline-flex;              /* place nombre + devise sur une même ligne */
+  flex-direction:row;
+  align-items:baseline;
+  justify-content:center;
+  gap:.25em;                        /* petit espace fixe                         */
+  margin-bottom:2px;
+  direction:ltr;                    /* évite les inversions RTL / bidi           */
+  unicode-bidi:plaintext;           /* garde l’ordre “nombre devise”             */
+}
+/* premier span = nombre, deuxième = devise */
+.tile-currency .value span:first-child{ order:1; }
+.tile-currency .value span:last-child { order:2; }
+/* peaufinage devise */
+.tile-currency .value .currency{
+  margin-left:.25em;                /* colle légèrement la monnaie              */
+  margin-right:0;
+}
+/* ligne <small> descriptive */
+.tile-currency small{
+  display:block;
+  margin-top:2px;
+  width:100%;
+  text-align:center;
+}
+
+/* — grille spéciale « rate-tiles » en 3 colonnes — */
+#rate-tiles.tiles{
+  grid-template-columns:repeat(3,1fr) !important;/* 3 tuiles devises         */
+}
+/* empêcher toute règle inline grid-column d’interférer */
+#rate-tiles .tile-currency{ grid-column:auto !important; }
+
+/* 17-c — Masquage complet du conteneur rate-tiles */
+#rate-tiles{display:none !important;}
+
+
+/* ════════════════════════════════════════════════════════════
+   18.  ALIGNEMENTS & CORRECTIFS  (Prévisionnel / Seuil)
+   (Les blocs existent déjà plus haut : ici seulement les
+    correctifs finaux, sans duplication.)
+   ════════════════════════════════════════════════════════════ */
+
+/* supprime padding-top forcé sur la tuile Seuil (col 4 / span 2) */
+.tile[style*="grid-column:4/span 2"]{ padding-top:0 !important; }
+/* garde le margin-top du <h4> pour équilibrer visuel */
+.tile[style*="grid-column:4/span 2"] h4{ margin-top:28px !important; }
+
+/* ROI / break-even main value */
+.break-even-value{ font-size:1.4rem; }
+
+/* alignements financiers dans les tables génériques */
+.data-table th.eur,
+.data-table th.usd,
+.data-table th.devise,
+.data-table td.eur,
+.data-table td.usd,
+.data-table td.devise,
+.data-table td.amount,
+.data-table th.amount{
+  text-align:right;                 /* montants alignés à droite */
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Capsules « Cours »  –  style unifié + améliorations
+   1) variables
+   2) conteneur
+   3) capsule générique + sous-éléments
+   4) état « editable »
+   5) bouton inverser
+   6) accessibilité / responsive
+   ───────────────────────────────────────────────────────────── */
+
+:root{
+  /* -- dimensions -------------------------------------------- */
+  --pill-h        : 36px;           /* même hauteur que le bouton  */
+  --pill-w        : 210px;          /* largeur fixe par défaut      */
+  --pill-gap      : 12px;           /* écart entre éléments         */
+  --pill-pad-x    : 18px;           /* padding horizontal           */
+  --pill-pad-y    :  6px;           /* padding vertical             */
+  --pill-radius   : 999px;
+
+  /* -- couleurs / effets ------------------------------------- */
+  --pill-bg       : var(--tile-bg); /* même fond glassmorphism      */
+  --pill-border   : #ffffff6f;      /* bordure blanche 44 %          */
+  --pill-shadow   : 0 0 6px rgba(0,0,0,.25);
+
+  /* -- typo --------------------------------------------------- */
+  --pill-fs       : 1rem;           /* taille texte                 */
+  --pill-label-w  : 900;            /* BTC-USD…                     */
+  --pill-val-w    : 600;            /* valeur numérique             */
+}
+
+/* 2) barre de capsules (alignée à droite) -------------------- */
+#rate-bar{
+  margin-left:auto;
+  margin-right:0px; 
+  display:flex;
+  align-items:center;
+  gap:var(--pill-gap);
+}
+
+/* 3) capsule générique -------------------------------------- */
+.rate-pill{
+  width:var(--pill-w);
+  height:var(--pill-h);
+  padding:var(--pill-pad-y) var(--pill-pad-x);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  font-size:var(--pill-fs);
+  background:var(--pill-bg);
+  backdrop-filter:blur(var(--blur));
+  border:1px solid var(--pill-border);
+  border-radius:var(--pill-radius);
+  box-shadow:var(--pill-shadow);
+}
+
+/* 3.1 libellé */
+.rate-pill strong{
+  font-weight:var(--pill-label-w);
+  white-space:nowrap;
+}
+
+/* 3.2 valeur + devise */
+.rate-pill .rate-val,
+.rate-pill .devise{
+  display:inline-block;
+  vertical-align:middle;
+}
+
+.rate-pill .rate-val{
+  min-width:64px;               /* aligne les chiffres */
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  font-weight:var(--pill-val-w);
+  opacity:.95;
+  margin-inline-end:2px;
+}
+
+.rate-pill .devise{
+  font-weight:700;
+}
+
+/* 4) état « editable » (GMT-USD) ----------------------------- */
+.rate-pill.editable input{
+  width:74px;
+  height:24px;
+  padding:0 6px;
+
+  border:none;
+  border-radius:20px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  text-align:right;
+  font-size:var(--pill-fs);
+}
+
+/* 5) bouton rond inverser ------------------------------------ */
+.pill-btn{
+  width:var(--pill-h);
+  height:var(--pill-h);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  background:var(--pill-bg);
+  backdrop-filter:blur(var(--blur));
+  border:1.7px solid #fff;
+  box-shadow:var(--pill-shadow);
+  cursor:pointer;
+  transition:background .18s;
+  stroke-width:1px;
+}
+.pill-btn:hover{background:rgba(255,255,255,.12);}
+.pill-btn svg{
+  width:1.4em;          /* 22 px avec base 14 px */
+  height:1.4em;
+  stroke-width:2.6px;   /* même trait que .btn.round */
+  color:#fff;
+}
+
+/* 6) accessibilité & responsive ------------------------------ */
+@media (prefers-reduced-motion: reduce){
+  .pill-btn{transition:none;}
+}
+
+@media (max-width:540px){
+  :root{
+    --pill-w:160px;          /* capsules plus compactes */
+    --pill-pad-x:14px;
+  }
+  .rate-pill .rate-val{min-width:48px;}
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   Sections pliables : on redonne 10 px d’air à droite du
+   header pour compenser la marge réduite du bouton « + »
+   (14 px → 24 px). L’alignement visuel avec les tuiles et
+   le bouton « invert » est ainsi conservé.
+   ────────────────────────────────────────────────────────── */
+.section-header{
+    padding-right:24px !important;  /* AVANT : 14 px */   /* [3] */
+}
+
+
+
+/* ─────────────────────────────────────────────────────────────
+   Modale « Nouvel investissement » : réalignement vertical
+
+   ──────────────────────────────────────────────────────────── */
+.modal-content .miner-btn{
+    position:relative;
+    top:5px !important; 
+}
+
+.modal-content .gmt-btn{     
+    position:relative;      
+    top:7px !important;
+    left:-3px !important;       
+  }
