@@ -5,53 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>GoMining</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Litepicker CSS (minimaliste, moderne, très lisible) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css">
-  <style>
-    /* Agrandir le calendrier Litepicker et le rendre plus visible */
-    .litepicker {
-      font-size: 1.25rem !important;
-      min-width: 340px !important;
-      box-shadow: 0 4px 32px #40dfff22 !important;
-      border-radius: 18px !important;
-      border: 1.5px solid #40dfff !important;
-      background: #181c24 !important;
-      color: #f4f8ff !important;
-      z-index: 9999 !important;
-    }
-    .litepicker .container__days .day-item {
-      border-radius: 8px !important;
-      font-weight: 600;
-      font-size: 1.1em;
-      transition: background .18s;
-    }
-    .litepicker .container__days .day-item.is-today {
-      background: #40dfff !important;
-      color: #181c24 !important;
-    }
-    .litepicker .container__days .day-item.is-selected {
-      background: linear-gradient(120deg, #40dfff 60%, #2d0347 100%) !important;
-      color: #fff !important;
-    }
-    .litepicker .container__days .day-item:hover {
-      background: #2d0347 !important;
-      color: #fff !important;
-    }
-    .litepicker .container__months {
-      background: #181c24 !important;
-      color: #40dfff !important;
-      font-weight: 700;
-    }
-    .litepicker .container__days .day-item.is-locked {
-      color: #888 !important;
-      background: none !important;
-    }
-    .litepicker .container__footer {
-      background: #181c24 !important;
-      color: #40dfff !important;
-    }
-  </style>
 </head>
 <body>
   <div id="app">
@@ -89,7 +42,7 @@
       </header>
       <div class="section-body">
         <table class="data-table">
-          <thead><tr><th>Date</th><th>Mineur</th><th>Catégorie</th><th>Quantité</th><th>Coût total</th><th>Cout unitaire</th><th></th></tr></thead>
+          <thead><tr><th>Date</th><th>Mineur</th><th>Catégorie</th><th>Quantité</th><th>Coût total</th><th>Coût unitaire</th><th></th></tr></thead>
           <tbody id="invest-table"></tbody>
         </table>
       </div>
@@ -161,8 +114,6 @@
   </div>
 
   <div id="toast" class="toast"></div>
-  <script src="https://cdn.jsdelivr.net/npm/litepicker" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

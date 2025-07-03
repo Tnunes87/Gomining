@@ -498,10 +498,10 @@ function investFields(edit,mode){
   if(mode==='new') return`
     <label>Puissance (TH)<input type="number" step="0.01" name="power" value="${edit?.power||''}" required></label>
     <label>Efficacité (W/TH)<input type="number" step="0.01" name="eff" value="${edit?.eff||''}" required></label>
-    <label>Coût (€)<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
+    <label>Coût<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
   if(mode==='gmt') return`
     <label>Quantité<input type="number" step="0.01" name="qty" value="${edit?.qty||''}" required></label>
-    <label>Coût (€)<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
+    <label>Coût<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
   const selectedTH  = (edit?.cat ?? 'TH') === 'TH'   ? 'selected' : '';
 const selectedWTH = (edit?.cat ?? 'TH') === 'W/TH' ? 'selected' : '';
 return `
@@ -511,7 +511,7 @@ return `
     <input type="hidden" name="cat" value="${edit?.cat||'TH'}">
   </div>
   <label>Quantité<input type="number" step="0.01" name="qty"  value="${edit?.qty||''}" required></label>
-  <label>Coût (€)<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
+  <label>Coût<input type="number" step="0.01" name="cost" value="${edit?.cost||''}" required></label>`;
 
 }
 
@@ -613,8 +613,8 @@ function openGainModal(edit=null){
     <form>
       <label>Date<input type="date" name="date" value="${edit?edit.date:todayISO()}" required></label>
       <label>Satoshis<input type="number" name="sats" value="${edit?.sats||''}" required></label>
-      <label>Service GMT<input type="number" step="0.01" name="service" value="${edit?.service||''}" required></label>
-      <label>Élec GMT<input type="number" step="0.01" name="elec" value="${edit?.elec||''}" required></label>
+      <label>Service<input type="number" step="0.01" name="service" value="${edit?.service||''}" required></label>
+      <label>Électricité<input type="number" step="0.01" name="elec" value="${edit?.elec||''}" required></label>
       <div class="modal-actions"><button type="button" class="btn cancel">Annuler</button><button class="btn primary">Enregistrer</button></div>
     </form>`,
   async fd=>{
@@ -640,7 +640,7 @@ function openSaleModal(edit=null){
     <form>
       <label>Date<input type="date" name="date" value="${edit?edit.date:todayISO()}" required></label>
       <label>Satoshis vendus<input type="number" name="sats" value="${edit?.sats||''}" required></label>
-      <label>Montant €<input type="number" step="0.01" name="montant" value="${edit?.montant||''}" required></label>
+      <label>Montant<input type="number" step="0.01" name="montant" value="${edit?.montant||''}" required></label>
       <div class="modal-actions"><button type="button" class="btn cancel">Annuler</button><button class="btn primary">Enregistrer</button></div>
     </form>`,
   async fd=>{
@@ -752,46 +752,4 @@ $$('.toggle').forEach(t=>t.addEventListener('click',()=>$('#'+t.dataset.target).
   renderTables();
 })();
 
-// Litepicker : remplace Flatpickr pour tous les <input type="date"> ou équivalent
-function enableLitepicker() {
-  if (window.Litepicker) {
-    setTimeout(() => {
-      $$("input[type='date'], input[data-datepicker]").forEach(input => {
-        // Remplace le type par text pour forcer l'affichage du calendrier custom sur Safari
-        input.setAttribute('type', 'text');
-        input.setAttribute('inputmode', 'none');
-        input.removeAttribute('readonly'); // Important : ne pas mettre readonly sur Safari
-        // Détruit un éventuel calendrier existant
-        if (input._litepicker) { input._litepicker.destroy(); }
-        input._litepicker = new Litepicker({
-          element: input,
-          format: 'YYYY-MM-DD',
-          lang: 'fr-FR',
-          autoApply: true,
-          dropdowns: { months: true, years: true },
-          tooltipText: { one: 'jour', other: 'jours' },
-          numberOfMonths: 1,
-          numberOfColumns: 1,
-          mobileFriendly: true,
-        });
-        // Safari : forcer l'ouverture du calendrier au focus/click
-        input.addEventListener('focus', e => {
-          if (input._litepicker) input._litepicker.show();
-        });
-        input.addEventListener('click', e => {
-          if (input._litepicker) input._litepicker.show();
-        });
-      });
-    }, 0);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', enableLitepicker);
-// Réactive Litepicker après chaque ouverture de modale
-window.showModal = (function(orig){
-  return function(html, onSubmit) {
-    orig(html, onSubmit);
-    enableLitepicker();
-  }
-})(window.showModal || showModal);
 })();
