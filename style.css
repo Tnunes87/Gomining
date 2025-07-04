@@ -1,5 +1,49 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+  GoMining v3.6.8 – style.css
+  Structure pédagogique, sommaire et numérotation logique des sections
+═══════════════════════════════════════════════════════════════════════════════
+
+  Ce fichier regroupe tous les styles de l’application GoMining.
+  Il est organisé en grands chapitres numérotés, avec sous-chapitres si besoin.
+  Chaque section est précédée d’un titre clair et d’un commentaire explicatif.
+
+  Table des matières (Ctrl+F pour naviguer) :
+    1. Police & variables globales
+    2. Reset minimal
+    3. Base HTML / body
+    4. Conteneur principal (#app)
+    5. Grilles génériques (.tiles & .miners-grid)
+    6. Sections pliables (wrapper, header, body)
+    7. Tuiles & cartes
+      7.1 Grilles génériques
+      7.2 Style générique : tuile & carte
+      7.3 Tuile (contenu centré)
+      7.4 Carte « miner »
+      7.5 Tuiles spéciales : Prévisionnel & Seuil
+    8. Boutons
+      8.1 Reset commun
+      8.2 Bouton de base (.btn)
+      8.3 Variantes (primary, danger)
+      8.4 Bouton « miner » (rond)
+      8.5 Bouton « cat-btn » (filtre)
+      8.6 Bouton « round » icône seule
+      8.7 Conteneur d’actions (droite header)
+    9. Formulaires
+   10. Tableaux
+   11. Modale (overlay + contenu centré)
+   12. Scrollbar
+   13. Debug panel
+   14. Masquage (filtres année & mois)
+   15. Badge « miner » & titres redondants
+   16. Tuile « prévisionnel » (tableau interne)
+   17. Alignements & correctifs
+   18. Capsules « cours » (rate-pill, pill-btn)
+   19. Responsive & accessibilité
+
+
 /* ════════════════════════════════════════════════════════════
-   0. POLICE & VARIABLES GLOBALES
+   1. POLICE & VARIABLES GLOBALES
    Chaque variable est annotée pour rappeler son usage exact.
    ════════════════════════════════════════════════════════════ */
 
@@ -11,7 +55,7 @@
   --blur   : 10px;   /* Flou glassmorphism appliqué aux tuiles, etc.  */
 
   /* ―– Couleurs principales –––––––––––––––––––––––––––––––– */
-  --primary : #ffc800; /* Bleu-cyan : couleur d’accent (boutons, badges)  */
+  --primary : #ffc800; /* Orane : couleur d’accent (boutons, badges)  */
   --danger  : #ff6363; /* Rouge doux : actions critiques / erreurs        */
   --fg      : #f4f8ff; /* Texte clair par défaut (avant sur #062b59)      */
 
@@ -22,7 +66,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   1. RESET MINIMAL
+   2. RESET MINIMAL
    Remise à zéro des marges et adoption du box-sizing universel.
    ════════════════════════════════════════════════════════════ */
 *{
@@ -32,7 +76,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   2. BASE HTML / BODY
+   3. BASE HTML / BODY
    Police, couleurs, fond général et conteneur principal.
    ════════════════════════════════════════════════════════════ */
 html, body{
@@ -58,12 +102,12 @@ body{
 }
 
 /* ════════════════════════════════════════════════════════════
-   3. CONTENEUR PRINCIPAL (#app)
+   4. CONTENEUR PRINCIPAL (#app)
    Centre la page et limite la largeur.
    ════════════════════════════════════════════════════════════ */
 #app{
   width      : 100%;
-  max-width  : 1380px;   /* largeur fixe desktop                        */
+  max-width  : 1280px;   /* largeur fixe desktop                        */
   display    : flex;
   flex-direction : column;
   gap        : 24px;
@@ -79,7 +123,7 @@ body{
 }
 
 /* ════════════════════════════════════════════════════════════
-   4. GRILLES GÉNÉRIQUES (.tiles & .miners-grid)
+   5. GRILLES GÉNÉRIQUES (.tiles & .miners-grid)
    Gap global + anti-débordement.
    ════════════════════════════════════════════════════════════ */
 .tiles,
@@ -91,7 +135,7 @@ body{
 
 
 /* ════════════════════════════════════════════════════════════
-   5. SECTIONS (wrapper, header, body)
+   6. SECTIONS (wrapper, header, body)
    ─ Rassemble toute la structure des blocs pliables
    ─ Chaque propriété est commentée pour faciliter la lecture
    ════════════════════════════════════════════════════════════ */
@@ -156,14 +200,14 @@ body{
 
 
 /* ════════════════════════════════════════════════════════════
-   6. TUILES & CARTES
+   7. TUILES & CARTES
    Blocs visuels réutilisables : « .tile » et « .miner-card »
    s’affichent dans deux grilles : .tiles (fixe 5 col.) et
    .miners-grid (auto-fit). Tous les sous-règles spécifiques
    (prévisionnel / seuil) restent ici pour garder la cohérence.
    ════════════════════════════════════════════════════════════ */
 
-/* 6-1  GRILLES GÉNÉRIQUES ---------------------------------- */
+/* 7-1  GRILLES GÉNÉRIQUES ---------------------------------- */
 .tiles,
 .miners-grid{
   display : grid;
@@ -188,7 +232,7 @@ body{
 }
 
 
-/* 6-2  STYLE GÉNÉRIQUE : tuile & carte ---------------------- */
+/* 7-2  STYLE GÉNÉRIQUE : tuile & carte ---------------------- */
 .tile,
 .miner-card{
   background      : rgba(255,255,255,.05);
@@ -206,7 +250,7 @@ body{
   box-shadow: 0 0 8px 1px rgba(255,255,255,.25); /* halo blanc */
 }
 
-/* 6-3  TUILE (contenu centré) ------------------------------- */
+/* 7-3  TUILE (contenu centré) ------------------------------- */
 .tile{
   text-align : center;
 }
@@ -263,7 +307,7 @@ body{
   fill:none;
 }
 
-/* 6-4  CARTE « miner » -------------------------------------- */
+/* 7-4  CARTE « miner » -------------------------------------- */
 .miner-card{
   display : flex;
   flex-direction : column;
@@ -291,7 +335,7 @@ body{
 }
 
 /* ════════════════════════════════════════════════════════════
-   6-5  TUILE « Prévisionnel » & « Seuil »
+   7-5  TUILE « Prévisionnel » & « Seuil »
    Spécifiques : affichage sur 3 / 2 colonnes, tableau interne
    ════════════════════════════════════════════════════════════ */
 
@@ -467,7 +511,7 @@ body{
 
 
 /* ════════════════════════════════════════════════════════════
-   7. BOUTONS
+   8. BOUTONS
    Chaque propriété est commentée individuellement.
    ════════════════════════════════════════════════════════════ */
 
@@ -646,7 +690,7 @@ button.cat-btn.selected{       /* état actif                                 */
 }
 
 /* ════════════════════════════════════════════════════════════
-   8. FORMULAIRES
+   9. FORMULAIRES
    Styles communs pour inputs number, text et liste déroulante
    Chaque propriété est annotée pour compréhension instantanée
    ════════════════════════════════════════════════════════════ */
@@ -696,7 +740,7 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 
 /* ════════════════════════════════════════════════════════════
-   9. TABLEAUX
+   10. TABLEAUX
    Table d’affichage générique (invest, miner list…)
    ════════════════════════════════════════════════════════════ */
 .data-table{
@@ -712,10 +756,11 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 .data-table tbody tr:hover{
   background:rgba(255,255,255,.10); /* survol discret                       */
+  border-radius: 20%;
 }
 
 /* ════════════════════════════════════════════════════════════
-   10. MODALE (overlay + contenu centré)
+   11. MODALE (overlay + contenu centré)
    ════════════════════════════════════════════════════════════ */
 
 /* — voile sombre couvrant tout l’écran — */
@@ -779,7 +824,7 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 
 /* ════════════════════════════════════════════════════════════
-   11. SCROLLBAR (WebKit only)
+   12. SCROLLBAR (WebKit only)
    ════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar{
   width:6px;                        /* taille verticale/horizontale         */
@@ -794,7 +839,7 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 
 /* ════════════════════════════════════════════════════════════
-   12. DEBUG PANEL (facultatif)
+   13. DEBUG PANEL (facultatif)
    Affiche JSON / état applicatif dans un cadre sombre
    ════════════════════════════════════════════════════════════ */
 #debug-json{
@@ -806,7 +851,7 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 
 /* ════════════════════════════════════════════════════════════
-   13. MASQUAGE (filtres année & mois dans Invest)
+   14. MASQUAGE (filtres année & mois dans Invest)
    ════════════════════════════════════════════════════════════ */
 #filter-year,
 #filter-month{
@@ -815,7 +860,7 @@ input[type="number"]::-webkit-outer-spin-button{
 
 
 /* ════════════════════════════════════════════════════════════
-   14. BADGE « MINER »  +  CACHER LES TITRES REDONDANTS
+   15. BADGE « MINER »  +  CACHER LES TITRES REDONDANTS
    - .miner-badge : pastille ronde numérotée ou lettre du mineur
    - Masquage des différents titres « Mineurs » dans la section Résumé
    ════════════════════════════════════════════════════════════ */
@@ -971,7 +1016,7 @@ input[type="number"]::-webkit-outer-spin-button{
 .data-table td.devise,
 .data-table td.amount,
 .data-table th.amount{
-  text-align:right;                               /* chiffres / devises alignés droite */
+  text-align:right !important;                               /* chiffres / devises alignés droite */
 }
 
 

@@ -1,54 +1,95 @@
-/* GoMining v3.6.8 – app.js (bloc 1 / 2)
-   • Tuile GMT “N/D | manuel” avec crayon.
-   • Tuile Gains, Entretien, Investissement, Ventes.               */
-(() => {
+/*
+═══════════════════════════════════════════════════════════════════════════════
+  GoMining v3.6.8 – app.js
+  Structure pédagogique et commentaires pour compréhension et apprentissage
+═══════════════════════════════════════════════════════════════════════════════
 
-/* ═════ 1. État & helpers ═════════════════════════════════════ */
-const DB_NAME='gominingDB_v3', DB_VERSION=1;
-const state={
-  miners:[], investissements:[], gains:[], ventes:[],
-  rates:{btc_usd:0,btc_eur:0,gmt_usd:0,gmt_eur:0,usd_eur:0,eur_usd:0},
-  manual_gmt_usd: localStorage.getItem('manual_gmt_usd') || '',
-  reduc         : parseFloat(localStorage.getItem('reduc') || '0.15')  // 15 % par défaut
+  Ce fichier contient toute la logique de l'application GoMining (version simple).
+  Il est organisé en grands blocs thématiques, chacun précédé d'un titre clair.
+  Chaque fonction ou section importante est commentée pour expliquer son rôle.
+  → Désormais, chaque ligne ou presque est commentée pour faciliter l'apprentissage !
 
+  Table des matières (recherche rapide avec Ctrl+F) :
+    1. État global & helpers
+    2. Accès base de données (IndexedDB)
+    3. Récupération des taux (API + manuel)
+    4. Affichage des capsules de taux
+    5. Calculs utilitaires
+    6. Rendu UI (tuiles, tableaux, mineurs)
+    7. Filtres et tables
+    8. Modales (fenêtres pop-up)
+    9. Gestion des clics globaux
+   10. Initialisation et bootstrap
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
+// ═════ 1. État global & helpers ════════════════════════════════════════════
+// --- Déclaration du nom et version de la base IndexedDB utilisée
+const DB_NAME = 'gominingDB_v3', DB_VERSION = 1; // Nom et version de la base locale
+// --- État principal de l'application (toutes les données utiles en mémoire)
+const state = {
+  miners: [],              // Liste des mineurs (objets, chaque mineur a id, power, eff, cost, date)
+  investissements: [],     // Liste des investissements (liés à un mineur ou à GMT)
+  gains: [],               // Liste des gains (récoltes de satoshis)
+  ventes: [],              // Liste des ventes (revente de satoshis)
+  rates: {                 // Taux de change et cours
+    btc_usd: 0,            // Cours du Bitcoin en USD
+    btc_eur: 0,            // Cours du Bitcoin en EUR
+    gmt_usd: 0,            // Cours du GMT en USD (manuel)
+    gmt_eur: 0,            // Cours du GMT en EUR (calculé)
+    usd_eur: 0,            // Taux de conversion USD → EUR
+    eur_usd: 0             // Taux de conversion EUR → USD
+  },
+  manual_gmt_usd: localStorage.getItem('manual_gmt_usd') || '', // Valeur GMT entrée manuellement (stockée localement)
+  reduc: parseFloat(localStorage.getItem('reduc') || '0.15')    // Réduction sur les frais (par défaut 15%)
 };
-const $  =(s,c=document)=>c.querySelector(s);
-const $$ =(s,c=document)=>[...c.querySelectorAll(s)];
-const fmt=(n,d=2)=>Number(n).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
-const todayISO=()=>new Date().toISOString().slice(0,10);
+// --- Helpers DOM (sélecteurs rapides)
+const $  = (s, c = document) => c.querySelector(s);           // Sélecteur unique CSS (ex: $('#id'))
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];   // Sélecteur multiple CSS (ex: $$('.classe'))
+// --- Helpers de formatage numérique
+const fmt = (n, d = 2) => Number(n).toLocaleString('fr-FR', { // Formate un nombre en français avec d décimales
+  minimumFractionDigits: d, maximumFractionDigits: d
+});
+const todayISO = () => new Date().toISOString().slice(0, 10); // Renvoie la date du jour au format AAAA-MM-JJ
 
 /* ═════ 2. IndexedDB mini-wrapper ═════════════════════════════ */
-let db=null;
-function openDB(){
-  if(db) return Promise.resolve(db);
-  return new Promise((ok,ko)=>{
-    const rq=indexedDB.open(DB_NAME,DB_VERSION);
-    rq.onerror=e=>ko(e.target.error);
-    rq.onupgradeneeded=e=>{
-      const d=e.target.result;
-      ['miners','investissements','gains','ventes'].forEach(s=>{
-        if(!d.objectStoreNames.contains(s))
-          d.createObjectStore(s,{keyPath:'id',autoIncrement:true});
+// Ce bloc gère l'accès à la base de données locale (IndexedDB) pour stocker
+// et retrouver les mineurs, investissements, gains et ventes.
+let db = null; // Référence à la base ouverte (null tant qu'on n'a pas ouvert)
+function openDB() {
+  if (db) return Promise.resolve(db); // Si déjà ouverte, on la réutilise
+  return new Promise((ok, ko) => {    // Sinon, on ouvre la base
+    const rq = indexedDB.open(DB_NAME, DB_VERSION); // Ouverture de la base
+    rq.onerror = e => ko(e.target.error);           // Gestion des erreurs
+    rq.onupgradeneeded = e => {                     // Création des tables si besoin
+      const d = e.target.result;
+      ['miners', 'investissements', 'gains', 'ventes'].forEach(s => {
+        if (!d.objectStoreNames.contains(s))        // Si la table n'existe pas
+          d.createObjectStore(s, { keyPath: 'id', autoIncrement: true }); // On la crée
       });
     };
-    rq.onsuccess=e=>{db=e.target.result;ok(db);};
+    rq.onsuccess = e => { db = e.target.result; ok(db); }; // Succès : on garde la référence
   });
 }
-function idb(store,mode,fn){
-  return openDB().then(db=>new Promise((ok,ko)=>{
-    const tx=db.transaction(store,mode), st=tx.objectStore(store);
-    const rq=fn(st); rq.onsuccess=_=>ok(rq.result); rq.onerror=_=>ko(rq.error);
+function idb(store, mode, fn) {
+  // Petite fonction utilitaire pour faire une opération sur un store (table)
+  return openDB().then(db => new Promise((ok, ko) => {
+    const tx = db.transaction(store, mode), st = tx.objectStore(store); // Transaction et store
+    const rq = fn(st); // On applique la fonction passée (add, put, getAll...)
+    rq.onsuccess = _ => ok(rq.result); // Succès : on renvoie le résultat
+    rq.onerror = _ => ko(rq.error);   // Erreur : on renvoie l'erreur
   }));
 }
-const DB={
-  add :(s,d)=>idb(s,'readwrite',st=>st.add(d)),
-  put :(s,d)=>idb(s,'readwrite',st=>st.put(d)),
-  del :(s,i)=>idb(s,'readwrite',st=>st.delete(i)),
-  all :(s)  =>idb(s,'readonly', st=>st.getAll()),
-  clear     :()=>openDB().then(db=>new Promise((ok,ko)=>{
-    const tx=db.transaction(['miners','investissements','gains','ventes'],'readwrite');
-    ['miners','investissements','gains','ventes'].forEach(s=>tx.objectStore(s).clear());
-    tx.oncomplete=_=>ok(); tx.onerror=_=>ko(tx.error);
+const DB = {
+  add: (s, d) => idb(s, 'readwrite', st => st.add(d)),    // Ajoute un objet dans la table s
+  put: (s, d) => idb(s, 'readwrite', st => st.put(d)),    // Met à jour un objet dans la table s
+  del: (s, i) => idb(s, 'readwrite', st => st.delete(i)), // Supprime un objet par id
+  all: (s)    => idb(s, 'readonly', st => st.getAll()),   // Récupère tous les objets d'une table
+  clear: ()   => openDB().then(db => new Promise((ok, ko) => { // Vide toutes les tables
+    const tx = db.transaction(['miners', 'investissements', 'gains', 'ventes'], 'readwrite');
+    ['miners', 'investissements', 'gains', 'ventes'].forEach(s => tx.objectStore(s).clear());
+    tx.oncomplete = _ => ok(); tx.onerror = _ => ko(tx.error);
   }))
 };
 
@@ -213,7 +254,7 @@ function nextMinerId(){const s=new Set(state.miners.map(m=>m.id));let i=1;while(
 const minerExtraCost=id=>state.investissements.filter(i=>i.minerId===id&&!['GMT','CREATION'].includes(i.cat)).reduce((t,i)=>t+i.cost,0);
 const minerTotalCost=m=>m.cost+minerExtraCost(m.id);
 
-/* ═════ 6. Rendu tuiles & mineurs ═══════════════════════════ */
+/* ═════ 6. Rendu UI (tuiles, tableaux, mineurs) ═══════════════════════════ */
 /* helper : génère UNE tuile HTML
    t     = titre          (ex. « Puissance totale »)
    icon  = nom Feather    (ex. « cpu »)
@@ -448,7 +489,7 @@ function renderMiners(){
     </div>`).join('');
 }
 
-/* ═════ 7. Filtres Invest & tables ═══════════════════════════ */
+/* ═════ 7. Filtres et tables ═══════════════════════════ */
 function populateInvFilters(){
   const years=[...new Set(state.investissements.map(i=>i.date.slice(0,4)))].sort();
   $('#filter-year').innerHTML='<option value="">Année</option>'+years.map(y=>`<option>${y}</option>`).join('');
@@ -480,7 +521,7 @@ function renderTables(){
   refreshIcons();
 }
 
-/* ═════ 8. Modale générique (showModal / closeModal) ════════ */
+/* ═════ 8. Modales (fenêtres pop-up) ════════ */
 function showModal(html,onSubmit){
   const ov=$('#modal-overlay'), box=$('#modal-content');
   box.innerHTML=html; ov.classList.remove('hidden'); refreshIcons();
@@ -750,6 +791,4 @@ $$('.toggle').forEach(t=>t.addEventListener('click',()=>$('#'+t.dataset.target).
   populateInvFilters();
   renderResume();
   renderTables();
-})();
-
 })();
