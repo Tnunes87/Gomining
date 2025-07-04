@@ -741,7 +741,7 @@ input[type="number"]::-webkit-outer-spin-button{
 
 /* ════════════════════════════════════════════════════════════
    10. TABLEAUX
-   Table d’affichage générique (invest, miner list…)
+   Table d’affichage générique (investissement, gains,ventes)
    ════════════════════════════════════════════════════════════ */
 .data-table{
   width:100%;                       /* s’aligne sur la grille               */
@@ -756,7 +756,6 @@ input[type="number"]::-webkit-outer-spin-button{
 }
 .data-table tbody tr:hover{
   background:rgba(255,255,255,.10); /* survol discret                       */
-  border-radius: 20%;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -767,8 +766,8 @@ input[type="number"]::-webkit-outer-spin-button{
 .modal-overlay{
   position:fixed;                   /* se place au-dessus de tout           */
   inset:0;                          /* couvre toute la fenêtre              */
-  background:rgba(0,0,0,.6);        /* noir semi-opaque                     */
-  backdrop-filter:blur(8px);        /* flou de fond (glassmorphism)         */
+  background:rgba(0, 0, 0, 0.451);        /* noir semi-opaque                     */
+  backdrop-filter:blur(10px);        /* flou de fond (glassmorphism)         */
   display:flex;                     /* permet de centrer le contenu         */
   align-items:center;
   justify-content:center;
