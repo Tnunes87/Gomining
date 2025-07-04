@@ -53,9 +53,11 @@ const fmt = (n, d = 2) => Number(n).toLocaleString('fr-FR', { // Formate un nomb
 });
 const todayISO = () => {
   const date = new Date();
-  return date.toLocaleDateString('fr-FR').split('/').join('-');
+  const jour = date.getDate().toString().padStart(2, '0');
+  const mois = (date.getMonth() + 1).toString().padStart(2, '0');
+  const annee = date.getFullYear();
+  return `${jour}-${mois}-${annee}`;
 }; // Renvoie la date du jour au format JJ-MM-AAAA
-
 
 /* ═════ 2. IndexedDB mini-wrapper ═════════════════════════════ */
 // Ce bloc gère l'accès à la base de données locale (IndexedDB) pour stocker
