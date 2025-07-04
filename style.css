@@ -150,7 +150,7 @@ body{
 .section{
   background : none;                                         /* on laisse le dégradé de body visible            */
   border     : 1px solid rgba(255,255,255,.18);              /* fin trait blanc translucide                     */
-  border-radius : var(--radius);                             /* arrondi global réutilisable                     */
+  border-radius : 40px;                             /* arrondi global réutilisable                     */
 }
 
 /* —— bandeau cliquable (titre + flèche + actions) ————————— */
@@ -813,6 +813,26 @@ input[type="number"]::-webkit-outer-spin-button{
 .table-capsule tbody tr td:last-child {
   border-top-right-radius: 25px;
   border-bottom-right-radius: 25px;
+}
+
+/* Boutons d'édition et suppression spécifiques aux tableaux */
+.table-capsule tbody tr td:last-child .btn {
+  width: 32px;                          /* Taille fixe pour uniformité */
+  height: 32px;
+  padding: 6px;                         /* Padding réduit */
+  border-radius: 50px;                   /* Coins légèrement arrondis */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;                     /* Espacement entre les boutons */
+}
+
+/* Taille des icônes dans ces boutons */
+.table-capsule tbody tr td:last-child .btn svg,
+.table-capsule tbody tr td:last-child .btn span[data-feather] {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2px;
 }
 
 

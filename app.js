@@ -51,7 +51,11 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];   // Sélecteur mult
 const fmt = (n, d = 2) => Number(n).toLocaleString('fr-FR', { // Formate un nombre en français avec d décimales
   minimumFractionDigits: d, maximumFractionDigits: d
 });
-const todayISO = () => new Date().toISOString().slice(0, 10); // Renvoie la date du jour au format AAAA-MM-JJ
+const todayISO = () => {
+  const date = new Date();
+  return date.toLocaleDateString('fr-FR').split('/').join('-');
+}; // Renvoie la date du jour au format JJ-MM-AAAA
+
 
 /* ═════ 2. IndexedDB mini-wrapper ═════════════════════════════ */
 // Ce bloc gère l'accès à la base de données locale (IndexedDB) pour stocker
