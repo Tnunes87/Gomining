@@ -529,14 +529,14 @@ button,                        /* cible les balises <button> */
   color:inherit;               /* hérite de la couleur du parent             */
   display:inline-flex;         /* contenu en ligne mais flex                 */
   align-items:center;          /* centre verticalement l’icône et le texte   */
-  gap:4px;                     /* espace constant entre icône et texte       */
+  gap:12px;                     /* espace constant entre icône et texte       */
   cursor:pointer;              /* pointeur main au survol                    */
 }
 
 /* ——— 7-2  BOUTON DE BASE (.btn) ——————————————— */
 .btn,                          /* même règles pour .btn et .toggle           */
 .toggle{
-  padding:8px 14px;            /* espace interne vertical 8px / horizontal 14px */
+  padding:8px 8px;            /* espace interne vertical 8px / horizontal 14px */
   border-radius:999px;         /* forme pilule (rayon maximal)               */
   transition:background .2s;   /* anim. douce du fond sur 0,2 s              */
 }
@@ -558,8 +558,8 @@ button,                        /* cible les balises <button> */
   color:var(--danger);         /* rouge attitré                              */
 }
 .btn.danger:hover{             /* survol variant danger                      */
-  background:rgba(255,99,99,.08); /* léger voile rouge                       */
-  color:#fff;                  /* texte blanc pour contraste                 */
+  background:rgba(255, 0, 0, 0.255); /* léger voile rouge                       */
+  color:#ff0000;                  /* texte blanc pour contraste                 */
 }
 
 /* ——— 7-3  BOUTON « miner » (rond) —————————— */
@@ -780,7 +780,7 @@ input[type="number"]::-webkit-outer-spin-button{
   padding: 4px 8px;
   color: inherit;
   vertical-align: middle;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Espace supplémentaire à gauche pour la première colonne */
