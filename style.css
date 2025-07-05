@@ -835,6 +835,62 @@ input[type="number"]::-webkit-outer-spin-button{
   stroke-width: 2px;
 }
 
+/* Alignements du contenu */
+
+.td-date {
+   text-align: left; 
+  }
+.td-miner { 
+  text-align: center; 
+}
+.td-text { 
+  text-align: left; 
+}
+.td-num  { 
+  text-align: right; 
+}
+.td-action {
+  text-align: center;
+}
+
+/* Alignements des titres */
+
+/* Investissements (7 colonnes : Date, Mineur, Catégorie, Quantité, Coût total, Coût unitaire, Actions) */
+section#investissements .table thead th:nth-child(1),
+section#gains           .table thead th:nth-child(1),
+section#ventes          .table thead th:nth-child(1) {
+  /* Date à gauche */
+  text-align: left;
+}
+
+section#investissements .table thead th:nth-child(2) {
+  /* Mineur centré */
+  text-align: center;
+}
+
+section#investissements .table thead th:nth-child(3),
+section#gains           .table thead th:nth-child(3) {
+  /* Texte (Catégorie, Service) à gauche */
+  text-align: left;
+}
+
+section#investissements .table thead th:nth-child(4),
+section#investissements .table thead th:nth-child(5),
+section#investissements .table thead th:nth-child(6),
+section#gains           .table thead th:nth-child(2),
+section#gains           .table thead th:nth-child(4),
+section#ventes          .table thead th:nth-child(2),
+section#ventes          .table thead th:nth-child(3) {
+  /* Numérique (Quantité, Coût total, Coût unitaire, Sats, Élec, Montant) à droite */
+  text-align: right;
+}
+
+section#investissements .table thead th:last-child,
+section#gains           .table thead th:last-child,
+section#ventes          .table thead th:last-child {
+  /* Actions centré */
+  text-align: center;
+}
 
 
 /* ════════════════════════════════════════════════════════════
