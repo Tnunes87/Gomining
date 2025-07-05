@@ -527,8 +527,8 @@ const tbodyInv = () =>
         <td class="td-miner">${i.minerId || ''}</td>
         <td class="td-text">${i.cat === 'CREATION' ? 'Création' : i.cat}</td>
         <td class="td-num">${i.qty}</td>
-        <td class="td-num">${fmt(i.cost, 2)}</td>
-        <td class="td-num">${fmt(i.cost / i.qty, 2)}</td>
+        <td class="td-num">${fmt(i.cost, 2)} €</td>
+        <td class="td-num">${fmt(i.cost / i.qty, 2)} €</td>
         <td class="td-action">
           <button class="btn" data-type="inv-edit" data-id="${i.id}">
             <span data-feather="edit-2"></span>
@@ -546,8 +546,8 @@ const tbodyGain = () =>
       <tr>
         <td class="td-date">${isoToFR(g.date)}</td>
         <td class="td-num">${g.sats}</td>
-        <td class="td-text">${g.service}</td>
         <td class="td-num">${g.elec}</td>
+        <td class="td-num">${g.service}</td>
         <td class="td-action">
           <button class="btn" data-type="gain-edit" data-id="${g.id}">
             <span data-feather="edit-2"></span>
@@ -566,10 +566,10 @@ const tbodySale = () =>
   state.ventes
     .map(
       s => `<tr>
-  <td>${isoToFR(s.date)}</td>
-  <td>${s.sats}</td>
-  <td>${fmt(s.montant, 2)} €</td>
-  <td>
+  <td class="td-date">${isoToFR(s.date)}</td>
+  <td class="td-num">${s.sats}</td>
+  <td class="td-num">${fmt(s.montant, 2)} €</td>
+  <td class="td-action">
     <button class="btn" data-type="sale-edit" data-id="${s.id}">
       <span data-feather="edit-2"></span>
     </button>
@@ -580,6 +580,7 @@ const tbodySale = () =>
 </tr>`
     )
     .join('');
+
 
 
 function renderTables(){
