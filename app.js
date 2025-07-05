@@ -510,18 +510,73 @@ let invFilter={year:'',month:''};
 $('#filter-year').addEventListener('change',e=>{invFilter.year=e.target.value;renderTables();});
 $('#filter-month').addEventListener('change',e=>{invFilter.month=e.target.value;renderTables();});
 
-const tbodyInv = () => state.investissements
-  .filter(i=>(!invFilter.year||i.date.startsWith(invFilter.year))&&(!invFilter.month||i.date.slice(5,7)===invFilter.month))
-  .map(i=>`<tr><td>${isoToFR(i.date)}</td><td>${i.minerId||'GMT'}</td><td>${i.cat==='CREATION'?'Création':i.cat}</td>
-           <td>${i.qty}</td><td>${fmt(i.cost,2)}</td><td>${fmt(i.cost/i.qty,2)}</td>
-           <td><button class="btn" data-type="inv-edit" data-id="${i.id}"><span data-feather="edit-2"></span></button>
-               <button class="btn danger" data-type="inv-del" data-id="${i.id}"><span data-feather="trash-2"></span></button></td></tr>`).join('');
-const tbodyGain= () => state.gains.map(g=>`<tr><td>${isoToFR(g.date)}</td><td>${g.sats}</td><td>${g.service}</td><td>${g.elec}</td>
-           <td><button class="btn" data-type="gain-edit" data-id="${g.id}"><span data-feather="edit-2"></span></button>
-               <button class="btn danger" data-type="gain-del" data-id="${g.id}"><span data-feather="trash-2"></span></button></td></tr>`).join('');
-const tbodySale= () => state.ventes.map(s=>`<tr><td>${isoToFR(s.date)}</td><td>${s.sats}</td><td>${fmt(s.montant,2)} €</td>
-           <td><button class="btn" data-type="sale-edit" data-id="${s.id}"><span data-feather="edit-2"></span></button>
-               <button class="btn danger" data-type="sale-del" data-id="${s.id}"><span data-feather="trash-2"></span></button></td></tr>`).join('');
+const tbodyInv = () =>
+  state.investissements
+    .filter(
+      i =>
+        (!invFilter.year || i.date.startsWith(invFilter.year)) &&
+        (!invFilter.month || i.date.slice(5, 7) === invFilter.month)
+    )
+    .map(
+      i => `<tr>
+  <td>${isoToFR(i.date)}</td>
+  <!-- n'affiche plus 'GMT' lorsque minerId est null -->
+  <td>${i.minerId || ''}</td>
+  <td>${i.cat === 'CREATION' ? 'Création' : i.cat}</td>
+  <td>${i.qty}</td>
+  <td>${fmt(i.cost, 2)}</td>
+  <td>${fmt(i.cost / i.qty, 2)}</td>
+  <td>
+    <button class="btn" data-type="inv-edit" data-id="${i.id}">
+      <span data-feather="edit-2"></span>
+    </button>
+    <button class="btn danger" data-type="inv-del" data-id="${i.id}">
+      <span data-feather="trash-2"></span>
+    </button>
+  </td>
+</tr>`
+    )
+    .join('');
+
+const tbodyGain = () =>
+  state.gains
+    .map(
+      g => `<tr>
+  <td>${isoToFR(g.date)}</td>
+  <td>${g.sats}</td>
+  <td>${g.service}</td>
+  <td>${g.elec}</td>
+  <td>
+    <button class="btn" data-type="gain-edit" data-id="${g.id}">
+      <span data-feather="edit-2"></span>
+    </button>
+    <button class="btn danger" data-type="gain-del" data-id="${g.id}">
+      <span data-feather="trash-2"></span>
+    </button>
+  </td>
+</tr>`
+    )
+    .join('');
+
+const tbodySale = () =>
+  state.ventes
+    .map(
+      s => `<tr>
+  <td>${isoToFR(s.date)}</td>
+  <td>${s.sats}</td>
+  <td>${fmt(s.montant, 2)} €</td>
+  <td>
+    <button class="btn" data-type="sale-edit" data-id="${s.id}">
+      <span data-feather="edit-2"></span>
+    </button>
+    <button class="btn danger" data-type="sale-del" data-id="${s.id}">
+      <span data-feather="trash-2"></span>
+    </button>
+  </td>
+</tr>`
+    )
+    .join('');
+
 
 function renderTables(){
   $('#invest-table').innerHTML = tbodyInv();
