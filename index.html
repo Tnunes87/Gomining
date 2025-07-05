@@ -42,7 +42,17 @@
       </header>
       <div class="section-body">
         <table class="data-table table-capsule">
-          <thead><tr><th>Date</th><th>Mineur</th><th>Catégorie</th><th>Quantité</th><th>Coût total</th><th>Coût unitaire</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th class="th-date">Date</th>
+              <th class="th-miner">Mineur</th>
+              <th class="th-text">Catégorie</th>
+              <th class="th-num">Quantité</th>
+              <th class="th-num">Coût total</th>
+              <th class="th-num">Coût unitaire</th>
+              <th class="th-action"></th>
+            </tr>
+          </thead>
           <tbody id="invest-table"></tbody>
         </table>
       </div>
@@ -59,7 +69,15 @@
       </header>
       <div class="section-body">
         <table class="data-table table-capsule">
-          <thead><tr><th>Date</th><th>Satoshis</th><th>Électricité</th><th>Service</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th class="th-date">Date</th>
+              <th class="th-num">Satoshis</th>
+              <th class="th-num">Électricité</th>
+              <th class="th-text">Service</th>
+              <th class="th-action"></th>
+            </tr>
+          </thead>
           <tbody id="gain-table"></tbody>
         </table>
       </div>
@@ -76,44 +94,42 @@
       </header>
       <div class="section-body">
         <table class="data-table table-capsule">
-          <thead><tr><th>Date</th><th>Satoshis vendus</th><th>Montant</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th class="th-date">Date</th>
+              <th class="th-num">Satoshis vendus</th>
+              <th class="th-num">Montant</th>
+              <th class="th-action"></th>
+            </tr>
+          </thead>
           <tbody id="sale-table"></tbody>
         </table>
       </div>
     </section>
 
-<!-- ─── Debug ────────────────────────────────────────────── -->
-<section id="debug" class="section">
-  <header class="section-header">
-    <button class="toggle" data-target="debug">
-      <span data-feather="chevron-down"></span>
-    </button>
-    <h2>Base de données</h2>
+    <!-- ─── Debug ────────────────────────────────────────────── -->
+    <section id="debug" class="section">
+      <header class="section-header">
+        <button class="toggle" data-target="debug"><span data-feather="chevron-down"></span></button>
+        <h2>Base de données</h2>
+        <div class="section-actions">
+          <button id="export-json-btn" class="btn"><span data-feather="upload"></span></button>
+          <button id="import-json-btn" class="btn"><span data-feather="download"></span></button>
+          <button id="reset-db-btn"  class="btn danger"><span data-feather="trash"></span></button>
+        </div>
+      </header>
+      <div class="section-body">
+        <pre id="debug-json"></pre>
+      </div>
+    </section>
 
-    <div class="section-actions">
-      <button id="export-json-btn" class="btn">
-        <span data-feather="upload"></span>
-      </button>
-      <button id="import-json-btn" class="btn">
-        <span data-feather="download"></span>
-      </button>
-      <button id="reset-db-btn"  class="btn danger">
-        <span data-feather="trash"></span>
-      </button>
+    <!-- ─── Modale réutilisable ───────────────────────────────── -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div id="modal-content" class="modal-content"></div>
     </div>
-  </header>
 
-  <div class="section-body">
-    <pre id="debug-json"></pre>
+    <div id="toast" class="toast"></div>
+    <script src="app.js" defer></script>
   </div>
-</section>
-
-  <!-- ─── Modale réutilisable ───────────────────────────────── -->
-  <div id="modal-overlay" class="modal-overlay hidden">
-    <div id="modal-content" class="modal-content"></div>
-  </div>
-
-  <div id="toast" class="toast"></div>
-  <script src="app.js" defer></script>
 </body>
 </html>
